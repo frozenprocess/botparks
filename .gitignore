@@ -1,0 +1,8 @@
+config.py
+*driver*
+model
+gathered_captchas/*
+.DS_Store
+.vscode
+venv
+__pycache__
