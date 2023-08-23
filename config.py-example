@@ -2,4 +2,4 @@
 first_name="First"
 last_name="Last"
 email="your@email.com"
-captcha_folder="gathered_captchas"
+captcha_folder="gathered_captchas/"

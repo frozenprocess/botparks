@@ -24,6 +24,7 @@ parser.add_argument("--trail","-t",default="Trail name", required=True)
 parser.add_argument("--visit_time",help="What time of day you like to visit the park? (eg. visitTimeDAY ,visitTimeAM ,visitTimePM)")
 parser.add_argument("--day","-d",default="2",help="Name of the day that you like to book pass. (eg. Monday)",required=True)
 parser.add_argument("--pass_count",default="1",help="In some cases you have to provide a pass count.")
+parser.add_argument("--headless",default=False,help="Don't show me the browser.")
 
 args = parser.parse_args()
 
@@ -35,7 +36,11 @@ captcha_folder=config.captcha_folder
 
 service = Service("./chromedriver")
 options = Options()
-# options.add_argument("--headless=new")
+
+# No browser thank you.
+if args.headless:
+    options.add_argument("--headless=new")
+
 driver = webdriver.Chrome(service=service,options=options)
 
 driver.maximize_window()
@@ -55,14 +60,15 @@ buttons = driver.find_elements(By.CLASS_NAME,"booking-button")
 # Choices should be 1-3 days
 # desired_date="Friday, August 18, 2023"
 now = dt.datetime.now()
-allowed_dates = [ now+dt.timedelta(days=+1), now+dt.timedelta(days=+2), now+dt.timedelta(days=+3) ]
+allowed_dates = [ now, now+dt.timedelta(days=+1), now+dt.timedelta(days=+2) ]
 
+desired_date = None
 for i in allowed_dates:
     if i.strftime('%A') == args.day:
         desired_date = i
 
 if desired_date is None:
-    print("Your desired day is is out of range.")
+    print("Your desired day is is out of range, pick a day between %s and %s."%(allowed_dates[0].strftime('%A'),allowed_dates[2].strftime('%A')))
     exit()
 
 redo = False
@@ -116,7 +122,7 @@ for button in buttons:
         if driver.find_element(By.ID,visit_time).get_attribute("disabled"):
             print(dt.datetime.now(),"Nothing available")
             exit()
-        driver.find_element(By.XPATH,"//label[.//input[@id=" + visit_time + "]]").click()
+        driver.find_element(By.XPATH,"//label[.//input[@id='" + visit_time + "']]").click()
 
         try:
             wait.until(EC.presence_of_element_located((By.ID,"passCount")))
